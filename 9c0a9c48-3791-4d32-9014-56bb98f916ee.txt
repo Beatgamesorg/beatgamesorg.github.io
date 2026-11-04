@@ -1,0 +1,73 @@
+let products = JSON.parse(localStorage.getItem('products')) || [
+    { id: 1, name: 'تخم آفتابگردان', price: 45000 },
+    { id: 2, name: 'روغن آفتابگردان', price: 95000 },
+    { id: 3, name: 'آفتابگردان خام', price: 55000 }
+];
+
+function saveProducts() {
+    localStorage.setItem('products', JSON.stringify(products));
+}
+
+function renderProducts() {
+    const productsList = document.getElementById('productsList');
+    productsList.innerHTML = '';
+
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+            <div class="sunflower">🌻</div>
+            <h3>${product.name}</h3>
+            <div class="price">${product.price.toLocaleString('fa-IR')} تومان</div>
+            
+            <div class="edit-section">
+                <input type="text" class="edit-name" value="${product.name}" placeholder="نام جدید">
+                <input type="number" class="edit-price" value="${product.price}" placeholder="قیمت جدید">
+                <button onclick="updateProduct(${product.id})">به‌روز</button>
+                <button class="delete-btn" onclick="deleteProduct(${product.id})">حذف</button>
+            </div>
+        `;
+        productsList.appendChild(card);
+    });
+}
+
+function updateProduct(id) {
+    const card = event.target.closest('.product-card');
+    const newName = card.querySelector('.edit-name').value;
+    const newPrice = parseInt(card.querySelector('.edit-price').value);
+
+    const product = products.find(p => p.id === id);
+    if (product) {
+        product.name = newName || product.name;
+        product.price = newPrice || product.price;
+        saveProducts();
+        renderProducts();
+    }
+}
+
+function deleteProduct(id) {
+    products = products.filter(p => p.id !== id);
+    saveProducts();
+    renderProducts();
+}
+
+document.getElementById('productForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('productName').value;
+    const price = parseInt(document.getElementById('productPrice').value);
+
+    const newProduct = {
+        id: Date.now(),
+        name: name,
+        price: price
+    };
+
+    products.push(newProduct);
+    saveProducts();
+    renderProducts();
+
+    document.getElementById('productForm').reset();
+});
+
+renderProducts();
